@@ -31,12 +31,12 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold">نظام توزيع الملاحظين على لجان الامتحانات</h1>
-                    <p class="text-xs text-indigo-200">مكتب القزاز للبرمجيات - إدارة اللجان والتوزيع العادل</p>
+                    <p class="text-xs text-indigo-200">مكتب القزاز للبرمجيات - إرشادات ولجان وتوزيع عادل</p>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2">
                 <button onclick="manualSaveData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-floppy-disk"></i> حفظ يدوي الآن
+                    <i class="fa-solid fa-floppy-disk"></i> حفظ البيانات
                 </button>
                 <button onclick="resetData()" class="bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
                     <i class="fa-solid fa-trash-can"></i> إفراغ البيانات
@@ -85,7 +85,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">ملاحظون لكل لجنة:</label>
-                            <input type="number" id="proctors-per-committee" oninput="autoSaveInputs()" value="2" min="1" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" id="proctors-per-committee" oninput="autoSaveInputs()" value="1" min="1" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                     </div>
                 </div>
@@ -120,6 +120,29 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Section: Off-days / Exceptions -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <h2 class="text-base font-bold text-slate-700 border-b pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-user-slash text-amber-600"></i> إجازات واستثناءات الملاحظين (تحديد أيام العمل)
+                </h2>
+                <p class="text-xs text-slate-500">حدد المعلم واليوم الذي لا يتواجد فيه، وسيتم استبعاده آلياً من جدول ذلك اليوم:</p>
+                <div class="flex flex-wrap gap-3 items-center">
+                    <select id="off-proctor-select" class="border rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-semibold">
+                        <!-- Populated by JS -->
+                    </select>
+                    <select id="off-day-select" class="border rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500 outline-none font-semibold">
+                        <!-- Populated by JS -->
+                    </select>
+                    <button onclick="addProctorOffDay()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                        <i class="fa-solid fa-plus ml-1"></i> إعفاء في هذا اليوم
+                    </button>
+                </div>
+
+                <div id="off-days-list" class="flex flex-wrap gap-2 pt-2">
+                    <!-- Populated by JS -->
+                </div>
             </div>
 
             <!-- Generate Button Action -->
@@ -230,7 +253,7 @@
             schoolName: "مدرسة معمل القزاز الثانوية",
             examTitle: "امتحانات الفصل الدراسي الأول",
             numCommittees: 4,
-            proctorsPerCommittee: 2,
+            proctorsPerCommittee: 1, // Default 1 per committee
             days: [
                 { date: "السبت 2026/01/10", subject: "اللغة العربية" },
                 { date: "الأحد 2026/01/11", subject: "الرياضيات" },
@@ -239,9 +262,9 @@
             ],
             proctors: [
                 "أحمد محمد علي", "محمود إبراهيم حسن", "محمد عبد الفتاح", "علي حسن يوسف",
-                "إبراهيم السيد أحمد", "سعيد عبد الله متولي", "مصطفى محمود السيد", "خالد عبد الحميد",
-                "أيمن فتحي محمد", "سامح عبد العزيز", "أسامة محمد رضا", "طارق حامد الشريف"
+                "إبراهيم السيد أحمد", "سعيد عبد الله متولي", "مصطفى محمود السيد", "خالد عبد الحميد"
             ],
+            offDays: [],
             schedule: null
         };
 
@@ -257,7 +280,7 @@
 
         function saveToStorage() {
             try {
-                localStorage.setItem('exam_proctor_data_v3', JSON.stringify(appData));
+                localStorage.setItem('exam_proctor_data_v5', JSON.stringify(appData));
             } catch(e) { console.error("Storage error:", e); }
         }
 
@@ -288,17 +311,18 @@
         }
 
         function loadData() {
-            const saved = localStorage.getItem('exam_proctor_data_v3');
+            const saved = localStorage.getItem('exam_proctor_data_v5');
             if(saved) {
                 try {
                     appData = JSON.parse(saved);
+                    if(!appData.offDays) appData.offDays = [];
                 } catch(e) { console.error(e); }
             }
         }
 
         function resetData() {
             if(confirm('هل أنت متأكد من إفراغ البيانات والعودة للوضع الافتراضي؟')) {
-                localStorage.removeItem('exam_proctor_data_v3');
+                localStorage.removeItem('exam_proctor_data_v5');
                 location.reload();
             }
         }
@@ -326,7 +350,7 @@
             appData.days.forEach((day, index) => {
                 daysContainer.innerHTML += `
                     <div class="flex gap-2 items-center day-row">
-                        <input type="text" value="${day.date}" oninput="autoSaveInputs()" placeholder="اليوم والتاريخ" class="day-date w-1/2 border rounded px-2 py-1.5 text-xs outline-none">
+                        <input type="text" value="${day.date}" oninput="autoSaveInputs(); updateOffDaySelects();" placeholder="اليوم والتاريخ" class="day-date w-1/2 border rounded px-2 py-1.5 text-xs outline-none">
                         <input type="text" value="${day.subject}" oninput="autoSaveInputs()" placeholder="المادة" class="day-subject w-1/2 border rounded px-2 py-1.5 text-xs outline-none">
                         <button onclick="removeDayRow(${index})" class="text-rose-500 hover:text-rose-700 px-1"><i class="fa-solid fa-trash"></i></button>
                     </div>
@@ -334,6 +358,8 @@
             });
 
             renderProctorsList();
+            updateOffDaySelects();
+            renderOffDaysList();
         }
 
         function addDayRow() {
@@ -360,6 +386,48 @@
                         <span class="font-semibold text-slate-700">${index + 1}. ${proctor}</span>
                         <button onclick="removeProctor(${index})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-xmark"></i></button>
                     </div>
+                `;
+            });
+            updateOffDaySelects();
+        }
+
+        function updateOffDaySelects() {
+            const procSel = document.getElementById('off-proctor-select');
+            const daySel = document.getElementById('off-day-select');
+            if(!procSel || !daySel) return;
+
+            procSel.innerHTML = appData.proctors.map(p => `<option value="${p}">${p}</option>`).join('');
+            daySel.innerHTML = appData.days.map(d => `<option value="${d.date}">${d.date} (${d.subject})</option>`).join('');
+        }
+
+        function addProctorOffDay() {
+            const pName = document.getElementById('off-proctor-select').value;
+            const dDate = document.getElementById('off-day-select').value;
+            if(!pName || !dDate) return;
+
+            if(!appData.offDays.some(o => o.proctorName === pName && o.date === dDate)) {
+                appData.offDays.push({ proctorName: pName, date: dDate });
+                saveToStorage();
+                renderOffDaysList();
+            }
+        }
+
+        function removeOffDay(index) {
+            appData.offDays.splice(index, 1);
+            saveToStorage();
+            renderOffDaysList();
+        }
+
+        function renderOffDaysList() {
+            const container = document.getElementById('off-days-list');
+            if(!container) return;
+            container.innerHTML = '';
+            appData.offDays.forEach((off, idx) => {
+                container.innerHTML += `
+                    <span class="bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-user-xmark text-amber-700"></i> ${off.proctorName} - (${off.date})
+                        <button onclick="removeOffDay(${idx})" class="text-amber-700 hover:text-rose-600 font-bold ml-1">&times;</button>
+                    </span>
                 `;
             });
         }
@@ -390,12 +458,15 @@
 
         function removeProctor(index) {
             collectInputs();
+            const pName = appData.proctors[index];
             appData.proctors.splice(index, 1);
+            appData.offDays = appData.offDays.filter(o => o.proctorName !== pName);
             saveToStorage();
             renderProctorsList();
+            renderOffDaysList();
         }
 
-        // GENERATE ALGORITHM
+        // GENERATE ALGORITHM (Supports 1 or more proctors per committee)
         function generateSchedule() {
             collectInputs();
             saveToStorage();
@@ -407,7 +478,6 @@
 
             const numComms = appData.numCommittees;
             const perComm = appData.proctorsPerCommittee;
-            const totalNeededPerDay = numComms * perComm;
 
             let proctorsStats = {};
             appData.proctors.forEach(p => {
@@ -417,7 +487,10 @@
             let schedule = [];
 
             appData.days.forEach((day, dayIndex) => {
-                let dayProctors = [...appData.proctors];
+                let dayProctors = appData.proctors.filter(p => {
+                    return !appData.offDays.some(o => o.proctorName === p && o.date === day.date);
+                });
+
                 dayProctors.sort((a, b) => {
                     let scoreA = (proctorsStats[a].committeesCount * 2) + proctorsStats[a].reserveCount;
                     let scoreB = (proctorsStats[b].committeesCount * 2) + proctorsStats[b].reserveCount;
@@ -514,7 +587,7 @@
                     comm.proctors.forEach((proc, pIdx) => {
                         html += `
                             <div class="flex items-center gap-1">
-                                <span class="text-xs text-slate-500 w-4">${pIdx+1}.</span>
+                                ${comm.proctors.length > 1 ? `<span class="text-xs text-slate-500 w-4">${pIdx+1}.</span>` : ''}
                                 <select onchange="updateProctorAssignment(${dayIdx}, ${comm.committeeNumber}, ${pIdx}, this.value)" class="w-full border rounded px-2 py-1 text-xs bg-white font-semibold text-slate-700 focus:ring-1 focus:ring-indigo-500">
                                     ${appData.proctors.map(p => `<option value="${p}" ${p === proc ? 'selected' : ''}>${p}</option>`).join('')}
                                 </select>
@@ -561,7 +634,7 @@
                 modalBody.innerHTML += `
                     <div class="border p-3 rounded-lg bg-slate-50 space-y-2">
                         <span class="font-bold text-xs text-indigo-800">اللجنة (${comm.committeeNumber}):</span>
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                             ${comm.proctors.map((p, pIdx) => `
                                 <select class="modal-proc-select border rounded p-1 text-xs bg-white" data-day="${dayIdx}" data-comm="${comm.committeeNumber}" data-pidx="${pIdx}">
                                     ${appData.proctors.map(pr => `<option value="${pr}" ${pr === p ? 'selected' : ''}>${pr}</option>`).join('')}
@@ -620,7 +693,7 @@
                             <thead>
                                 <tr class="bg-slate-100 text-slate-700">
                                     <th class="border border-slate-300 p-2 w-20 text-center">اللجنة</th>
-                                    <th class="border border-slate-300 p-2">السادة الملاحظون</th>
+                                    <th class="border border-slate-300 p-2">السيد الملاحظ / الملاحظون</th>
                                     <th class="border border-slate-300 p-2 w-48 text-center">التوقيع بالاستلام</th>
                                 </tr>
                             </thead>
