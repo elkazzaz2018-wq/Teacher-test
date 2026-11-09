@@ -31,12 +31,12 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold">نظام توزيع الملاحظين على لجان الامتحانات</h1>
-                    <p class="text-xs text-indigo-200">إدارة اللجان، توزيع الملاحظين الاحتياطي والأساسي، ومنع التكرار وتعديل الجداول</p>
+                    <p class="text-xs text-indigo-200">مكتب القزاز للبرمجيات - إدارة اللجان والتوزيع العادل</p>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button onclick="saveData()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
-                    <i class="fa-solid fa-floppy-disk"></i> حفظ البيانات
+                <button onclick="manualSaveData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-floppy-disk"></i> حفظ يدوي الآن
                 </button>
                 <button onclick="resetData()" class="bg-rose-600 hover:bg-rose-500 text-white px-3 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1 shadow-sm">
                     <i class="fa-solid fa-trash-can"></i> إفراغ البيانات
@@ -72,20 +72,20 @@
                     </h2>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">اسم المدرسة:</label>
-                        <input type="text" id="school-name" value="مدرسة معمل القزاز الثانوية" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <input type="text" id="school-name" oninput="autoSaveInputs()" value="مدرسة معمل القزاز الثانوية" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">اسم الامتحان / الفصل الدراسي:</label>
-                        <input type="text" id="exam-title" value="امتحانات الفصل الدراسي الأول" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <input type="text" id="exam-title" oninput="autoSaveInputs()" value="امتحانات الفصل الدراسي الأول" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">عدد اللجان:</label>
-                            <input type="number" id="num-committees" value="4" min="1" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" id="num-committees" oninput="autoSaveInputs()" value="4" min="1" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">ملاحظون لكل لجنة:</label>
-                            <input type="number" id="proctors-per-committee" value="2" min="1" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <input type="number" id="proctors-per-committee" oninput="autoSaveInputs()" value="2" min="1" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-4 no-print">
                 <div>
                     <h2 class="text-lg font-bold text-slate-800">جداول التوزيع اليومية والاحتياطي</h2>
-                    <p class="text-xs text-slate-500">يمكنك تعديل أي ملاحظ مباشرة من القائمة المنسدلة في الجدول أو استخدام زر التعديل اليدوي.</p>
+                    <p class="text-xs text-slate-500">التعديل على أي معلم يتم حفظه تلقائياً في الجدول.</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="generateSchedule()" class="bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100 px-3 py-2 rounded-lg text-sm font-semibold transition">
@@ -204,7 +204,7 @@
 
     <!-- Manual Edit Day Modal -->
     <div id="edit-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl max-w-2w w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-xl">
+        <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-xl">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 id="modal-title" class="text-base font-bold text-slate-800">تعديل توزيع اليوم</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
@@ -242,7 +242,7 @@
                 "إبراهيم السيد أحمد", "سعيد عبد الله متولي", "مصطفى محمود السيد", "خالد عبد الحميد",
                 "أيمن فتحي محمد", "سامح عبد العزيز", "أسامة محمد رضا", "طارق حامد الشريف"
             ],
-            schedule: null // Generated schedule results
+            schedule: null
         };
 
         // Initialize App
@@ -255,25 +255,40 @@
             }
         });
 
-        function saveData() {
+        function saveToStorage() {
+            try {
+                localStorage.setItem('exam_proctor_data_v3', JSON.stringify(appData));
+            } catch(e) { console.error("Storage error:", e); }
+        }
+
+        function manualSaveData() {
+            collectInputs();
+            saveToStorage();
+            alert('تم حفظ البيانات بنجاح!');
+        }
+
+        function autoSaveInputs() {
+            collectInputs();
+            saveToStorage();
+        }
+
+        function collectInputs() {
             appData.schoolName = document.getElementById('school-name').value;
             appData.examTitle = document.getElementById('exam-title').value;
             appData.numCommittees = parseInt(document.getElementById('num-committees').value) || 1;
             appData.proctorsPerCommittee = parseInt(document.getElementById('proctors-per-committee').value) || 1;
             
-            // Collect days
             const dayRows = document.querySelectorAll('.day-row');
-            appData.days = Array.from(dayRows).map(row => ({
-                date: row.querySelector('.day-date').value,
-                subject: row.querySelector('.day-subject').value
-            })).filter(d => d.subject.trim() !== "");
-
-            localStorage.setItem('exam_proctor_data_v2', JSON.stringify(appData));
-            alert('تم حفظ البيانات بنجاح!');
+            if(dayRows.length > 0) {
+                appData.days = Array.from(dayRows).map(row => ({
+                    date: row.querySelector('.day-date').value,
+                    subject: row.querySelector('.day-subject').value
+                })).filter(d => d.subject.trim() !== "");
+            }
         }
 
         function loadData() {
-            const saved = localStorage.getItem('exam_proctor_data_v2');
+            const saved = localStorage.getItem('exam_proctor_data_v3');
             if(saved) {
                 try {
                     appData = JSON.parse(saved);
@@ -283,7 +298,7 @@
 
         function resetData() {
             if(confirm('هل أنت متأكد من إفراغ البيانات والعودة للوضع الافتراضي؟')) {
-                localStorage.removeItem('exam_proctor_data_v2');
+                localStorage.removeItem('exam_proctor_data_v3');
                 location.reload();
             }
         }
@@ -306,14 +321,13 @@
             document.getElementById('num-committees').value = appData.numCommittees;
             document.getElementById('proctors-per-committee').value = appData.proctorsPerCommittee;
 
-            // Days
             const daysContainer = document.getElementById('days-container');
             daysContainer.innerHTML = '';
             appData.days.forEach((day, index) => {
                 daysContainer.innerHTML += `
                     <div class="flex gap-2 items-center day-row">
-                        <input type="text" value="${day.date}" placeholder="اليوم والتاريخ" class="day-date w-1/2 border rounded px-2 py-1.5 text-xs outline-none">
-                        <input type="text" value="${day.subject}" placeholder="المادة" class="day-subject w-1/2 border rounded px-2 py-1.5 text-xs outline-none">
+                        <input type="text" value="${day.date}" oninput="autoSaveInputs()" placeholder="اليوم والتاريخ" class="day-date w-1/2 border rounded px-2 py-1.5 text-xs outline-none">
+                        <input type="text" value="${day.subject}" oninput="autoSaveInputs()" placeholder="المادة" class="day-subject w-1/2 border rounded px-2 py-1.5 text-xs outline-none">
                         <button onclick="removeDayRow(${index})" class="text-rose-500 hover:text-rose-700 px-1"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 `;
@@ -323,12 +337,16 @@
         }
 
         function addDayRow() {
+            collectInputs();
             appData.days.push({ date: `اليوم ${appData.days.length + 1}`, subject: "مادة جديدة" });
+            saveToStorage();
             renderSettings();
         }
 
         function removeDayRow(index) {
+            collectInputs();
             appData.days.splice(index, 1);
+            saveToStorage();
             renderSettings();
         }
 
@@ -347,33 +365,41 @@
         }
 
         function addProctor() {
+            collectInputs();
             const input = document.getElementById('new-proctor-name');
             const name = input.value.trim();
             if(name) {
                 appData.proctors.push(name);
                 input.value = '';
+                saveToStorage();
                 renderProctorsList();
             }
         }
 
         function addBulkProctors() {
+            collectInputs();
             const textarea = document.getElementById('bulk-proctors');
             const lines = textarea.value.split('\n').map(l => l.trim()).filter(l => l !== '');
             if(lines.length > 0) {
                 appData.proctors.push(...lines);
                 textarea.value = '';
+                saveToStorage();
                 renderProctorsList();
             }
         }
 
         function removeProctor(index) {
+            collectInputs();
             appData.proctors.splice(index, 1);
+            saveToStorage();
             renderProctorsList();
         }
 
-        // GENERATE ALGORITHM (Fair distribution + No committee repetition + Equal reserve)
+        // GENERATE ALGORITHM
         function generateSchedule() {
-            saveData();
+            collectInputs();
+            saveToStorage();
+
             if(appData.proctors.length === 0) {
                 alert('الرجاء إضافة معلمين أولاً!');
                 return;
@@ -383,25 +409,15 @@
             const perComm = appData.proctorsPerCommittee;
             const totalNeededPerDay = numComms * perComm;
 
-            if(appData.proctors.length < totalNeededPerDay) {
-                alert(`تنبيه: عدد المعلمين (${appData.proctors.length}) أقل من إجمالي الاحتياج اليومي للجان (${totalNeededPerDay}). الرجاء زيادة عدد المعلمين أو تقليل اللجان.`);
-            }
-
             let proctorsStats = {};
             appData.proctors.forEach(p => {
-                proctorsStats[p] = {
-                    committeesCount: 0,
-                    reserveCount: 0,
-                    lastCommittee: -1, // To avoid repeating same committee consecutively
-                    historyComms: []
-                };
+                proctorsStats[p] = { committeesCount: 0, reserveCount: 0, lastCommittee: -1 };
             });
 
             let schedule = [];
 
             appData.days.forEach((day, dayIndex) => {
                 let dayProctors = [...appData.proctors];
-                // Shuffle slightly or sort by least tasks for fairness
                 dayProctors.sort((a, b) => {
                     let scoreA = (proctorsStats[a].committeesCount * 2) + proctorsStats[a].reserveCount;
                     let scoreB = (proctorsStats[b].committeesCount * 2) + proctorsStats[b].reserveCount;
@@ -412,11 +428,9 @@
                 let committees = [];
                 let assignedToday = new Set();
 
-                // Assign to committees
                 for(let c = 1; c <= numComms; c++) {
                     let commProctors = [];
                     for(let p = 0; p < perComm; p++) {
-                        // Find best proctor for this committee
                         let chosen = null;
                         for(let candidate of dayProctors) {
                             if(!assignedToday.has(candidate) && proctorsStats[candidate].lastCommittee !== c) {
@@ -424,7 +438,6 @@
                                 break;
                             }
                         }
-                        // Fallback if strict condition fails
                         if(!chosen) {
                             for(let candidate of dayProctors) {
                                 if(!assignedToday.has(candidate)) {
@@ -442,17 +455,13 @@
                             commProctors.push(chosen);
                             proctorsStats[chosen].committeesCount++;
                             proctorsStats[chosen].lastCommittee = c;
-                            proctorsStats[chosen].historyComms.push({ day: dayIndex, committee: c });
                         }
                     }
                     committees.push({ committeeNumber: c, proctors: commProctors });
                 }
 
-                // Remaining proctors go to Reserve
                 let reserve = dayProctors.filter(p => !assignedToday.has(p));
-                reserve.forEach(r => {
-                    proctorsStats[r].reserveCount++;
-                });
+                reserve.forEach(r => { proctorsStats[r].reserveCount++; });
 
                 schedule.push({
                     dayIndex: dayIndex,
@@ -464,13 +473,13 @@
             });
 
             appData.schedule = schedule;
-            saveData();
+            saveToStorage();
             renderResults();
             renderReports();
             switchTab('results');
         }
 
-        // Render Results Table & Interactive Selects
+        // Render Results Table
         function renderResults() {
             const container = document.getElementById('schedule-results-container');
             container.innerHTML = '';
@@ -515,7 +524,6 @@
                     html += `</div></div>`;
                 });
 
-                // Reserve section
                 html += `
                         <div class="border rounded-lg p-3 bg-amber-50/50 space-y-2 border-amber-200">
                             <h4 class="font-bold text-xs text-amber-900 border-b border-amber-200 pb-1 flex items-center justify-between">
@@ -533,26 +541,21 @@
             });
         }
 
-        // Update individual Proctor selection inline
         function updateProctorAssignment(dayIdx, committeeNum, proctorIdx, newProctor) {
             let comm = appData.schedule[dayIdx].committees.find(c => c.committeeNumber === committeeNum);
             if(comm) {
                 comm.proctors[proctorIdx] = newProctor;
-                saveData();
+                saveToStorage();
                 renderReports();
             }
         }
 
-        // Manual Edit Modal
         function openManualEditModal(dayIdx) {
             const dayData = appData.schedule[dayIdx];
             document.getElementById('modal-title').textContent = `تعديل توزيع يوم: ${dayData.date} (${dayData.subject})`;
             
             let modalBody = document.getElementById('modal-body');
-            modalBody.innerHTML = `
-                <p class="text-xs text-slate-500">قم بإعادة ترتيب أو اختيار الملاحظين لكل لجنة في هذا اليوم بسهولة:</p>
-                <div class="space-y-3" id="modal-committees-list">
-            `;
+            modalBody.innerHTML = `<div class="space-y-3" id="modal-committees-list">`;
 
             dayData.committees.forEach((comm, cIdx) => {
                 modalBody.innerHTML += `
@@ -574,7 +577,6 @@
         }
 
         function closeModal() {
-            // Collect selects from modal and update schedule
             const selects = document.querySelectorAll('.modal-proc-select');
             selects.forEach(sel => {
                 let dayIdx = parseInt(sel.getAttribute('data-day'));
@@ -588,13 +590,12 @@
                 }
             });
 
-            saveData();
+            saveToStorage();
             renderResults();
             renderReports();
             document.getElementById('edit-modal').classList.add('hidden');
         }
 
-        // Render Print Reports
         function renderReports() {
             document.getElementById('print-school-name').textContent = appData.schoolName;
             document.getElementById('print-exam-title').textContent = appData.examTitle;
@@ -602,10 +603,7 @@
             const container = document.getElementById('print-content-container');
             container.innerHTML = '';
 
-            if(!appData.schedule) {
-                container.innerHTML = '<p class="text-center text-slate-500">لا توجد بيانات للطباعة.</p>';
-                return;
-            }
+            if(!appData.schedule) return;
 
             appData.schedule.forEach((dayData, dayIdx) => {
                 let html = `
@@ -652,7 +650,6 @@
             });
         }
 
-        // Export to Excel using SheetJS
         function exportToExcel() {
             if(!appData.schedule) {
                 alert('الرجاء توليد الجدول أولاً!');
